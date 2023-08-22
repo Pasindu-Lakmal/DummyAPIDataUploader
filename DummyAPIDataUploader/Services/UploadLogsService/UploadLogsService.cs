@@ -3,28 +3,7 @@
   
     public class UploadLogsService : IUploadLogsService
     {
-        private static List<UploadLogDetail> uploadLogDetails = new List<UploadLogDetail>
-            {
-                new UploadLogDetail
-                {
-                    Id = 1,
-                    UploadedBy= "kasun",
-                    UploadedDate = new DateTime(2023, 8, 21),
-                    FileName = "new File",
-                    FileType = "Staff",
-                    StaffData ="{}"
-                },
-                new UploadLogDetail
-                {
-                    Id = 2,
-                    UploadedBy= "pasindu",
-                    UploadedDate = new DateTime(2023, 8, 21),
-                    FileName = "new File",
-                    FileType = "Hierarchy",
-                    StaffData ="{}"
-                },
-
-            };
+        
         private readonly DataContext _context;
 
         public UploadLogsService(DataContext context)
@@ -36,7 +15,7 @@
             _context.UploadLogDetails.Add(logDetail);
             await _context.SaveChangesAsync();
             
-            return uploadLogDetails;
+            return await _context.UploadLogDetails.ToListAsync();
         }
 
         public async Task<List<UploadLogDetail>?> DeleteUploadLog(int id)
@@ -51,7 +30,7 @@
             {
                 _context.UploadLogDetails.Remove(uploadLog);
                 await _context.SaveChangesAsync();
-                return uploadLogDetails;
+                return await _context.UploadLogDetails.ToListAsync();
             }
 
 
@@ -94,7 +73,7 @@
 
                 await _context.SaveChangesAsync();
 
-                return uploadLogDetails;
+                return await _context.UploadLogDetails.ToListAsync();
             }
  
         }
