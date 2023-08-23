@@ -13,6 +13,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUploadLogsService, UploadLogsService>();
 builder.Services.AddDbContext<DataContext>();
+builder.Services.AddCors(option => option.AddPolicy(name:"uploader" , 
+    
+    policy=>
+    {
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    }
+    
+    ));
 
 var app = builder.Build();
 
@@ -22,6 +30,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("uploader");
 
 app.UseHttpsRedirection();
 
