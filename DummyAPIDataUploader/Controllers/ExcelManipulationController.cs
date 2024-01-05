@@ -27,26 +27,15 @@ namespace DummyAPIDataUploader.Controllers
                 application.DefaultVersion = ExcelVersion.Xlsx;
                 IWorkbook workbook = application.Workbooks.Create(1);
                 IWorksheet sheet = workbook.Worksheets[0];
-                //Creating Vba project
+               
                 IVbaProject project = workbook.VbaProject;
-                //Accessing vba modules collection
+   
                 IVbaModules vbaModules = project.Modules;
-                // Accessing sheet module
+                
                 IVbaModule vbaModule = vbaModules[sheet.CodeName];
-                //Adding vba code to the module
-                vbaModule.Code = macrocode;
-                //vbaModule.Code = "Sub Auto_Open\n MsgBox \" Workbook Opened \" \n End Sub";
-                //vbaModule.Code = "Private Sub Worksheet_Change(ByVal Target As Range)\n Dim Oldvalue As String\n Dim Newvalue As String\n Application.EnableEvents = True\nOn Error GoTo Exitsub\n If Not Intersect(Target, Range(\"B:B\")) Is Nothing Then\n   If Target.Value = \"\" Then GoTo Exitsub Else\n    Application.EnableEvents = False\n  Newvalue = Target.Value\n     Application.Undo\n    Oldvalue = Target.Value\n      If Oldvalue = \"\" Then\n        Target.Value = Newvalue\n      Else\n        If InStr(1, Oldvalue, Newvalue) = 0 Then\n            Target.Value = Oldvalue & \", \" & Newvalue\n      Else:\n                Target.Value = Oldvalue\n      End If\n  End If\n End If\n Application.EnableEvents = True\nExitsub:\n                Application.EnableEvents = True\nEnd Sub\n";
-
-                //#region Save
-
-                ////Saving the workbook
-                //FileStream outputStream = new FileStream("pos.xlsm", FileMode.Create, FileAccess.Write);
-                //workbook.SaveAs(outputStream, ExcelSaveType.SaveAsMacro);
-                //#endregion
-
-
-
+               
+                vbaModule.Code = macrocode;       
+            
                 MemoryStream stream = new MemoryStream();
                 workbook.SaveAs(stream);
 
@@ -57,21 +46,6 @@ namespace DummyAPIDataUploader.Controllers
                 FileStreamResult fileStreamResult = new FileStreamResult(stream, "application/excel");
                 fileStreamResult.FileDownloadName = "Output.xlsm";
                 return fileStreamResult;
-
-
-
-
-                
-
-                ////Dispose streams
-                //outputStream.Dispose();
-
-                //System.Diagnostics.Process process = new System.Diagnostics.Process();
-                //process.StartInfo = new System.Diagnostics.ProcessStartInfo("pos.xlsm")
-                //{
-                //    UseShellExecute = true
-                //};
-                //process.Start();
             }
 
         
@@ -80,7 +54,7 @@ namespace DummyAPIDataUploader.Controllers
         }
 
         [HttpPost("CreateMultiselect")]
-        public string CreateMultiSelect([FromBody] string macrocode)
+        public IActionResult CreateMultiSelect([FromBody] string macrocode)
         {
             using (ExcelEngine excelEngine = new ExcelEngine())
             {
@@ -104,88 +78,35 @@ namespace DummyAPIDataUploader.Controllers
                 
                 //Creating Vba project
                 IVbaProject project = workbook.VbaProject;
+
                 //Accessing vba modules collection
                 IVbaModules vbaModules = project.Modules;
+
                 // Accessing sheet module
                 IVbaModule vbaModule = vbaModules[worksheet.CodeName];
+
                 //Adding vba code to the module
                 vbaModule.Code = macrocode;
-                
-                
-                #region Save
-                //Saving the workbook
-                
-                FileStream outputStream = new FileStream("ListValidation.xlsx", FileMode.Create, FileAccess.Write);
-                workbook.SaveAs(outputStream);
-                #endregion
 
-                //Dispose streams
-                outputStream.Dispose();
 
-                System.Diagnostics.Process process = new System.Diagnostics.Process();
-                process.StartInfo = new System.Diagnostics.ProcessStartInfo("ListValidation.xlsx")
-                {
-                    UseShellExecute = true
-                };
-                process.Start();
+                MemoryStream stream = new MemoryStream();
+                workbook.SaveAs(stream);
+
+                //Set the position as '0'.
+                stream.Position = 0;
+
+                //Download the Excel file in the browser
+                FileStreamResult fileStreamResult = new FileStreamResult(stream, "application/excel");
+                fileStreamResult.FileDownloadName = "Output.xlsm";
+                return fileStreamResult;
+
             }
-            return macrocode;
+      
+
         }
-
-
-        // GET api/<ExcelManipulationController>/5
-        [HttpGet("{macrocode}")]
-        public void Get(string macrocode)
-        {
-            using (ExcelEngine excelEngine = new ExcelEngine())
-            {
-                IApplication application = excelEngine.Excel;
-                application.DefaultVersion = ExcelVersion.Xlsx;
-                IWorkbook workbook = application.Workbooks.Create(1);
-                IWorksheet sheet = workbook.Worksheets[0];
-
-                //Creating Vba project
-                IVbaProject project = workbook.VbaProject;
-
-                //Accessing vba modules collection
-                IVbaModules vbaModules = project.Modules;
-
-                // Accessing sheet module
-                IVbaModule vbaModule = vbaModules[sheet.CodeName];
-
-                //Adding vba code to the module
-               
-                vbaModule.Code = macrocode.ToString();
-
-                //vbaModule.Code = "Sub Auto_Open\n MsgBox \" Workbook Opened \" \n End Sub";
-                //vbaModule.Code = "Private Sub Worksheet_Change(ByVal Target As Range)\n Dim Oldvalue As String\n Dim Newvalue As String\n Application.EnableEvents = True\nOn Error GoTo Exitsub\n If Not Intersect(Target, Range(\"B:B\")) Is Nothing Then\n   If Target.Value = \"\" Then GoTo Exitsub Else\n    Application.EnableEvents = False\n  Newvalue = Target.Value\n     Application.Undo\n    Oldvalue = Target.Value\n      If Oldvalue = \"\" Then\n        Target.Value = Newvalue\n      Else\n        If InStr(1, Oldvalue, Newvalue) = 0 Then\n            Target.Value = Oldvalue & \", \" & Newvalue\n      Else:\n                Target.Value = Oldvalue\n      End If\n  End If\n End If\n Application.EnableEvents = True\nExitsub:\n                Application.EnableEvents = True\nEnd Sub\n";
-
-
-
-
-
-                #region Save
-                //Saving the workbook
-                FileStream outputStream = new FileStream("kggi.xlsm", FileMode.Create, FileAccess.Write);
-                workbook.SaveAs(outputStream, ExcelSaveType.SaveAsMacro);
-                #endregion
-
-                //Dispose streams
-                outputStream.Dispose();
-
-                System.Diagnostics.Process process = new System.Diagnostics.Process();
-                process.StartInfo = new System.Diagnostics.ProcessStartInfo("kggi.xlsm")
-                {
-                    UseShellExecute = true
-                };
-                process.Start();
-            }
-        }
-
-
 
         // GET: api/<ExcelManipulationController>
-        [HttpGet]
+        [HttpGet("CreateBasicExcel")]
         public IActionResult Get()
         {
             //Adding Document to the workbook
@@ -202,6 +123,7 @@ namespace DummyAPIDataUploader.Controllers
                 //Adding a picture
 
 
+                
 
                 //Disable gridlines in the worksheet
                 worksheet.IsGridLinesVisible = false;
