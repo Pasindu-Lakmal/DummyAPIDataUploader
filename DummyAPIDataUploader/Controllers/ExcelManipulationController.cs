@@ -18,7 +18,7 @@ namespace DummyAPIDataUploader.Controllers
 
 
         [HttpPost("CreateMultiValue")]
-        public  string CreateMultiValue([FromBody] string macrocode)
+        public  IActionResult CreateMultiValue([FromBody] string macrocode)
         {
 
             using (ExcelEngine excelEngine = new ExcelEngine())
@@ -37,25 +37,44 @@ namespace DummyAPIDataUploader.Controllers
                 vbaModule.Code = macrocode;
                 //vbaModule.Code = "Sub Auto_Open\n MsgBox \" Workbook Opened \" \n End Sub";
                 //vbaModule.Code = "Private Sub Worksheet_Change(ByVal Target As Range)\n Dim Oldvalue As String\n Dim Newvalue As String\n Application.EnableEvents = True\nOn Error GoTo Exitsub\n If Not Intersect(Target, Range(\"B:B\")) Is Nothing Then\n   If Target.Value = \"\" Then GoTo Exitsub Else\n    Application.EnableEvents = False\n  Newvalue = Target.Value\n     Application.Undo\n    Oldvalue = Target.Value\n      If Oldvalue = \"\" Then\n        Target.Value = Newvalue\n      Else\n        If InStr(1, Oldvalue, Newvalue) = 0 Then\n            Target.Value = Oldvalue & \", \" & Newvalue\n      Else:\n                Target.Value = Oldvalue\n      End If\n  End If\n End If\n Application.EnableEvents = True\nExitsub:\n                Application.EnableEvents = True\nEnd Sub\n";
-                #region Save
 
-                //Saving the workbook
-                FileStream outputStream = new FileStream("pos.xlsm", FileMode.Create, FileAccess.Write);
-                workbook.SaveAs(outputStream, ExcelSaveType.SaveAsMacro);
-                #endregion
+                //#region Save
 
-                //Dispose streams
-                outputStream.Dispose();
+                ////Saving the workbook
+                //FileStream outputStream = new FileStream("pos.xlsm", FileMode.Create, FileAccess.Write);
+                //workbook.SaveAs(outputStream, ExcelSaveType.SaveAsMacro);
+                //#endregion
 
-                System.Diagnostics.Process process = new System.Diagnostics.Process();
-                process.StartInfo = new System.Diagnostics.ProcessStartInfo("pos.xlsm")
-                {
-                    UseShellExecute = true
-                };
-                process.Start();
+
+
+                MemoryStream stream = new MemoryStream();
+                workbook.SaveAs(stream);
+
+                //Set the position as '0'.
+                stream.Position = 0;
+
+                //Download the Excel file in the browser
+                FileStreamResult fileStreamResult = new FileStreamResult(stream, "application/excel");
+                fileStreamResult.FileDownloadName = "Output.xlsm";
+                return fileStreamResult;
+
+
+
+
+                
+
+                ////Dispose streams
+                //outputStream.Dispose();
+
+                //System.Diagnostics.Process process = new System.Diagnostics.Process();
+                //process.StartInfo = new System.Diagnostics.ProcessStartInfo("pos.xlsm")
+                //{
+                //    UseShellExecute = true
+                //};
+                //process.Start();
             }
 
-            return macrocode;
+        
 
 
         }

@@ -4,7 +4,7 @@ global using DummyAPIDataUploader.Data;
 using DummyAPIDataUploader.Services.UploadLogsService;
 using Syncfusion.Licensing;
 
-var builder = WebApplication.CreateBuilder(args);
+evar builder = WebApplication.CreateBuilder(args);
 
 
 
