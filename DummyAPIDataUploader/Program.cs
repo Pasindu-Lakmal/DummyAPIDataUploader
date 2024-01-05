@@ -2,9 +2,14 @@ global using Microsoft.EntityFrameworkCore;
 global using DummyAPIDataUploader.Models;
 global using DummyAPIDataUploader.Data;
 using DummyAPIDataUploader.Services.UploadLogsService;
+using Syncfusion.Licensing;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+
+// Register Syncfusion license
+SyncfusionLicenseProvider.RegisterLicense("Mgo+DSMBMAY9C3t2UVhhQlVFfV1dXnxLflFyVWpTfll6dF1WACFaRnZdRl1iSXpRd0dgXH1ddXNS");
 // Add services to the container.
 
 builder.Services.AddControllers();

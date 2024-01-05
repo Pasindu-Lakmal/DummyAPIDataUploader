@@ -2,6 +2,10 @@
 using Syncfusion.XlsIO;
 using System.IO;
 using Syncfusion.Drawing;
+using Syncfusion.Office;
+using Microsoft.OpenApi.Any;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Net.WebRequestMethods;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -11,6 +15,156 @@ namespace DummyAPIDataUploader.Controllers
     [ApiController]
     public class ExcelManipulationController : ControllerBase
     {
+
+
+        [HttpPost("CreateMultiValue")]
+        public  string CreateMultiValue([FromBody] string macrocode)
+        {
+
+            using (ExcelEngine excelEngine = new ExcelEngine())
+            {
+                IApplication application = excelEngine.Excel;
+                application.DefaultVersion = ExcelVersion.Xlsx;
+                IWorkbook workbook = application.Workbooks.Create(1);
+                IWorksheet sheet = workbook.Worksheets[0];
+                //Creating Vba project
+                IVbaProject project = workbook.VbaProject;
+                //Accessing vba modules collection
+                IVbaModules vbaModules = project.Modules;
+                // Accessing sheet module
+                IVbaModule vbaModule = vbaModules[sheet.CodeName];
+                //Adding vba code to the module
+                vbaModule.Code = macrocode;
+                //vbaModule.Code = "Sub Auto_Open\n MsgBox \" Workbook Opened \" \n End Sub";
+                //vbaModule.Code = "Private Sub Worksheet_Change(ByVal Target As Range)\n Dim Oldvalue As String\n Dim Newvalue As String\n Application.EnableEvents = True\nOn Error GoTo Exitsub\n If Not Intersect(Target, Range(\"B:B\")) Is Nothing Then\n   If Target.Value = \"\" Then GoTo Exitsub Else\n    Application.EnableEvents = False\n  Newvalue = Target.Value\n     Application.Undo\n    Oldvalue = Target.Value\n      If Oldvalue = \"\" Then\n        Target.Value = Newvalue\n      Else\n        If InStr(1, Oldvalue, Newvalue) = 0 Then\n            Target.Value = Oldvalue & \", \" & Newvalue\n      Else:\n                Target.Value = Oldvalue\n      End If\n  End If\n End If\n Application.EnableEvents = True\nExitsub:\n                Application.EnableEvents = True\nEnd Sub\n";
+                #region Save
+
+                //Saving the workbook
+                FileStream outputStream = new FileStream("pos.xlsm", FileMode.Create, FileAccess.Write);
+                workbook.SaveAs(outputStream, ExcelSaveType.SaveAsMacro);
+                #endregion
+
+                //Dispose streams
+                outputStream.Dispose();
+
+                System.Diagnostics.Process process = new System.Diagnostics.Process();
+                process.StartInfo = new System.Diagnostics.ProcessStartInfo("pos.xlsm")
+                {
+                    UseShellExecute = true
+                };
+                process.Start();
+            }
+
+            return macrocode;
+
+
+        }
+
+        [HttpPost("CreateMultiselect")]
+        public string CreateMultiSelect([FromBody] string macrocode)
+        {
+            using (ExcelEngine excelEngine = new ExcelEngine())
+            {
+                IApplication application = excelEngine.Excel;
+                application.DefaultVersion = ExcelVersion.Xlsx;
+                IWorkbook workbook = application.Workbooks.Create(1);
+                IWorksheet worksheet = workbook.Worksheets[0];
+
+                //Data Validation for List
+                IDataValidation listValidation = worksheet.Range["C3"].DataValidation;
+                worksheet.Range["C1"].Text = "Data Validation List in C3";
+                worksheet.Range["C1"].AutofitColumns();
+                listValidation.ListOfValues = new string[] { "ListItem1", "ListItem2", "ListItem3" };
+
+                //Shows the error message
+                listValidation.ErrorBoxText = "Choose the value from the list";
+                listValidation.ErrorBoxTitle = "ERROR";
+                listValidation.PromptBoxText = "Data validation for list";
+                listValidation.IsPromptBoxVisible = true;
+                listValidation.ShowPromptBox = true;
+                
+                //Creating Vba project
+                IVbaProject project = workbook.VbaProject;
+                //Accessing vba modules collection
+                IVbaModules vbaModules = project.Modules;
+                // Accessing sheet module
+                IVbaModule vbaModule = vbaModules[worksheet.CodeName];
+                //Adding vba code to the module
+                vbaModule.Code = macrocode;
+                
+                
+                #region Save
+                //Saving the workbook
+                
+                FileStream outputStream = new FileStream("ListValidation.xlsx", FileMode.Create, FileAccess.Write);
+                workbook.SaveAs(outputStream);
+                #endregion
+
+                //Dispose streams
+                outputStream.Dispose();
+
+                System.Diagnostics.Process process = new System.Diagnostics.Process();
+                process.StartInfo = new System.Diagnostics.ProcessStartInfo("ListValidation.xlsx")
+                {
+                    UseShellExecute = true
+                };
+                process.Start();
+            }
+            return macrocode;
+        }
+
+
+        // GET api/<ExcelManipulationController>/5
+        [HttpGet("{macrocode}")]
+        public void Get(string macrocode)
+        {
+            using (ExcelEngine excelEngine = new ExcelEngine())
+            {
+                IApplication application = excelEngine.Excel;
+                application.DefaultVersion = ExcelVersion.Xlsx;
+                IWorkbook workbook = application.Workbooks.Create(1);
+                IWorksheet sheet = workbook.Worksheets[0];
+
+                //Creating Vba project
+                IVbaProject project = workbook.VbaProject;
+
+                //Accessing vba modules collection
+                IVbaModules vbaModules = project.Modules;
+
+                // Accessing sheet module
+                IVbaModule vbaModule = vbaModules[sheet.CodeName];
+
+                //Adding vba code to the module
+               
+                vbaModule.Code = macrocode.ToString();
+
+                //vbaModule.Code = "Sub Auto_Open\n MsgBox \" Workbook Opened \" \n End Sub";
+                //vbaModule.Code = "Private Sub Worksheet_Change(ByVal Target As Range)\n Dim Oldvalue As String\n Dim Newvalue As String\n Application.EnableEvents = True\nOn Error GoTo Exitsub\n If Not Intersect(Target, Range(\"B:B\")) Is Nothing Then\n   If Target.Value = \"\" Then GoTo Exitsub Else\n    Application.EnableEvents = False\n  Newvalue = Target.Value\n     Application.Undo\n    Oldvalue = Target.Value\n      If Oldvalue = \"\" Then\n        Target.Value = Newvalue\n      Else\n        If InStr(1, Oldvalue, Newvalue) = 0 Then\n            Target.Value = Oldvalue & \", \" & Newvalue\n      Else:\n                Target.Value = Oldvalue\n      End If\n  End If\n End If\n Application.EnableEvents = True\nExitsub:\n                Application.EnableEvents = True\nEnd Sub\n";
+
+
+
+
+
+                #region Save
+                //Saving the workbook
+                FileStream outputStream = new FileStream("kggi.xlsm", FileMode.Create, FileAccess.Write);
+                workbook.SaveAs(outputStream, ExcelSaveType.SaveAsMacro);
+                #endregion
+
+                //Dispose streams
+                outputStream.Dispose();
+
+                System.Diagnostics.Process process = new System.Diagnostics.Process();
+                process.StartInfo = new System.Diagnostics.ProcessStartInfo("kggi.xlsm")
+                {
+                    UseShellExecute = true
+                };
+                process.Start();
+            }
+        }
+
+
+
         // GET: api/<ExcelManipulationController>
         [HttpGet]
         public IActionResult Get()
@@ -27,8 +181,8 @@ namespace DummyAPIDataUploader.Controllers
                 IWorksheet worksheet = workbook.Worksheets[0];
 
                 //Adding a picture
-               
-            
+
+
 
                 //Disable gridlines in the worksheet
                 worksheet.IsGridLinesVisible = false;
@@ -199,32 +353,8 @@ namespace DummyAPIDataUploader.Controllers
                 fileStreamResult.FileDownloadName = "Output.xlsx";
                 return fileStreamResult;
             }
-            //return new string[] { "value1", "value2" };
         }
 
-        // GET api/<ExcelManipulationController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
 
-        // POST api/<ExcelManipulationController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/<ExcelManipulationController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<ExcelManipulationController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }
