@@ -10,6 +10,5 @@
 
         Task<List<UploadLogDetail>?> DeleteUploadLog(int id);
 
-
     }
 }

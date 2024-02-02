@@ -3,6 +3,7 @@ global using DummyAPIDataUploader.Models;
 global using DummyAPIDataUploader.Data;
 using DummyAPIDataUploader.Services.UploadLogsService;
 using Syncfusion.Licensing;
+using DummyAPIDataUploader.Services.ExcelManipulationServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IUploadLogsService, UploadLogsService>();
+builder.Services.AddScoped<IExcelManipulationService, ExcelManipulationService>();
 builder.Services.AddDbContext<DataContext>();
 builder.Services.AddCors(option => option.AddPolicy(name:"uploader" , 
     
