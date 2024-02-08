@@ -133,74 +133,111 @@ namespace DummyAPIDataUploader.Controllers
         {
             using (ExcelEngine excelEngine = new ExcelEngine())
             {
+                string cellString = "";
 
-                string macrocode = "Private Sub Worksheet_Change(ByVal Target As Range)\n\t" +
-    "Dim rngDropdown As Range\n\t" +
-    "Dim oldValue As String\n\t" +
-    "Dim newValue As String\n\t" +
-    "Dim DelimiterType As String\n\t" +
-    "Dim DelimiterCount As Integer\n\t" +
-    "Dim TargetType As Integer\n\t" +
-    "Dim i As Integer\n\t" +
-    "Dim arr() As String\n\t" +
+                foreach (var item in dropdownDetails)
+                {
+                    var upperCaseCellId = item.Cell.ToUpper();
+                    cellString += upperCaseCellId+":"+upperCaseCellId+", ";
+                   
+                }
+                cellString = cellString.Remove(cellString.Length - 2);
 
-    "If Target.Count > 1 Then Exit Sub\n\t" +
-    "If Not Intersect(Target, Me.Range(\"C:C, I:I, J:J\")) Is Nothing Then\n\t\t" +
-        "On Error Resume Next\n\t\t" +
+                string code1 = "Private Sub Worksheet_Change(ByVal Target As Range)\n\t" +
+                                "Dim rngDropdown As Range\n\t" +
+                                "Dim oldValue As String\n\t" +
+                                "Dim newValue As String\n\t" +
+                                "Dim DelimiterType As String\n\t" +
+                                "Dim DelimiterCount As Integer\n\t" +
+                                "Dim TargetType As Integer\n\t" +
+                                "Dim i As Integer\n\t" +
+                                "Dim arr() As String\n\t" +
 
-        "Set rngDropdown = Me.Cells.SpecialCells(xlCellTypeAllValidation)\n\t\t" +
-        "On Error GoTo exitError\n\t\t" +
+                                "If Target.Count > 1 Then Exit Sub\n\t" +
+                                "If Not Intersect(Target, Me.Range(\"";
 
-        "If rngDropdown Is Nothing Then GoTo exitError\n\t\t" +
+                                            string code2 = "\")) Is Nothing Then\n\t\t" +
+                                    "On Error Resume Next\n\t\t" +
 
-        "TargetType = 0\n\t\t" +
-        "TargetType = Target.Validation.Type\n\t" +
-        "If TargetType = 3 Then  ' is validation type is \"list\"\n\t" +
-            "Application.ScreenUpdating = False\n\t" +
-            "Application.EnableEvents = False\n\t" +
-            "newValue = Target.Value\n\t" +
-            "Application.Undo\n\t" +
-            "oldValue = Target.Value\n\t" +
-            "Target.Value = newValue\n\t" +
-            "If oldValue <> \"\" Then\n\t" +
-                "If newValue <> \"\" Then\n\t" +
-                    "If oldValue = newValue Then ' leave the value if there is only one in the list\n\t" +
-                        "Target.Value = oldValue\n\t" +
-                    "ElseIf InStr(1, oldValue, newValue & \",\") > 0 Then\n\t" +
-                        "Target.Value = Replace(oldValue, newValue & \",\", \"\")\n\t" +
-                    "ElseIf InStr(1, oldValue, \",\" & newValue) > 0 Then\n\t" +
-                        "Target.Value = Replace(oldValue, \",\" & newValue, \"\")\n\t" +
-                    "Else\n\t" +
-                        "Target.Value = oldValue & \",\" & newValue\n\t" +
-                    "End If\n\t" +
-                "End If\n\t" +
-            "End If\n\t" +
-            "Application.EnableEvents = True\n\t" +
-            "Application.ScreenUpdating = True\n\t" +
-        "End If\n\t" +
-    "End If\n" +
+                                    "Set rngDropdown = Me.Cells.SpecialCells(xlCellTypeAllValidation)\n\t\t" +
+                                    "On Error GoTo exitError\n\t\t" +
 
-"exitError:\n\t" +
-    "Application.EnableEvents = True\n" +
-"End Sub";
+                                    "If rngDropdown Is Nothing Then GoTo exitError\n\t\t" +
 
+                                    "TargetType = 0\n\t\t" +
+                                    "TargetType = Target.Validation.Type\n\t" +
+                                    "If TargetType = 3 Then  ' is validation type is \"list\"\n\t" +
+                                        "Application.ScreenUpdating = False\n\t" +
+                                        "Application.EnableEvents = False\n\t" +
+                                        "newValue = Target.Value\n\t" +
+                                        "Application.Undo\n\t" +
+                                        "oldValue = Target.Value\n\t" +
+                                        "Target.Value = newValue\n\t" +
+                                        "If oldValue <> \"\" Then\n\t" +
+                                            "If newValue <> \"\" Then\n\t" +
+                                                "If oldValue = newValue Then ' leave the value if there is only one in the list\n\t" +
+                                                    "Target.Value = oldValue\n\t" +
+                                                "ElseIf InStr(1, oldValue, newValue & \",\") > 0 Then\n\t" +
+                                                    "Target.Value = Replace(oldValue, newValue & \",\", \"\")\n\t" +
+                                                "ElseIf InStr(1, oldValue, \",\" & newValue) > 0 Then\n\t" +
+                                                    "Target.Value = Replace(oldValue, \",\" & newValue, \"\")\n\t" +
+                                                "Else\n\t" +
+                                                    "Target.Value = oldValue & \",\" & newValue\n\t" +
+                                                "End If\n\t" +
+                                            "End If\n\t" +
+                                        "End If\n\t" +
+                                        "Application.EnableEvents = True\n\t" +
+                                        "Application.ScreenUpdating = True\n\t" +
+                                    "End If\n\t" +
+                                "End If\n" +
+
+                            "exitError:\n\t" +
+                                "Application.EnableEvents = True\n" +
+                            "End Sub";
+                string macroCode = code1 + cellString + code2;
                 IApplication application = excelEngine.Excel;
                 application.DefaultVersion = ExcelVersion.Xlsx;
                 IWorkbook workbook = application.Workbooks.Create(1);
                 IWorksheet worksheet = workbook.Worksheets[0];
 
                 //Data Validation for List
-                IDataValidation listValidation = worksheet.Range["C3"].DataValidation;
-                worksheet.Range["C1"].Text = "Data Validation List in C3";
-                worksheet.Range["C1"].AutofitColumns();
-                listValidation.ListOfValues = new string[] { "ListItem1", "ListItem2", "ListItem3" };
+
+                foreach (var item in dropdownDetails)
+                {
+                    var upperCaseCellId = item.Cell.ToUpper();
+                    worksheet.Range[upperCaseCellId + "1"].Text = item.ColumnName;
+                    worksheet.Range[upperCaseCellId + "1"].AutofitColumns();
+                    
+                    
+                    for (int i = 2; i <= 5000; i++)
+                    {
+                        worksheet.Range[upperCaseCellId + i].AutofitColumns();
+                        IDataValidation listValidations = worksheet.Range[upperCaseCellId + i].DataValidation;
+                        listValidations.ListOfValues = item.DropDownValues;
+                        listValidations.ErrorBoxText = "Choose the value from the list";
+                        listValidations.ErrorBoxTitle = "ERROR";
+                      
+                    }
+                }
+
+
+
+                //IDataValidation listValidation =  worksheet.Range["C3"].DataValidation;
+                //worksheet.Range["C1"].Text = "Data Validation List in C3";
+                //worksheet.Range["C1"].AutofitColumns();
+                //listValidation.ListOfValues = new string[] { "ListItem1", "ListItem2", "ListItem3" };
+
+                //IDataValidation listValidation1 = worksheet.Range["B3"].DataValidation;
+                //worksheet.Range["B1"].Text = "Data Validation List in B3";
+                //worksheet.Range["B1"].AutofitColumns();
+                //listValidation1.ListOfValues = new string[] { "Item1", "Item2", "Item3" };
 
                 //Shows the error message
-                listValidation.ErrorBoxText = "Choose the value from the list";
-                listValidation.ErrorBoxTitle = "ERROR";
-                listValidation.PromptBoxText = "Data validation for list";
-                listValidation.IsPromptBoxVisible = true;
-                listValidation.ShowPromptBox = true;
+                //listValidation.ErrorBoxText = "Choose the value from the list";
+                //listValidation.ErrorBoxTitle = "ERROR";
+                //listValidation.PromptBoxText = "Data validation for list";
+                //listValidation.IsPromptBoxVisible = true;
+                //listValidation.ShowPromptBox = true;
 
                 //Creating Vba project
                 IVbaProject project = workbook.VbaProject;
@@ -212,7 +249,7 @@ namespace DummyAPIDataUploader.Controllers
                 IVbaModule vbaModule = vbaModules[worksheet.CodeName];
 
                 //Adding vba code to the module
-                vbaModule.Code = macrocode;
+                vbaModule.Code = macroCode;
 
 
                 MemoryStream stream = new MemoryStream();

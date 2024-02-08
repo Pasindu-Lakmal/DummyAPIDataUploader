@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 // Register Syncfusion license
-SyncfusionLicenseProvider.RegisterLicense("Mgo+DSMBMAY9C3t2UVhhQlVFfV1dXnxLflFyVWpTfll6dF1WACFaRnZdRl1iSXpRd0dgXH1ddXNS");
+SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NAaF1cXmhKYVRpR2Nbe05yflFOal9UVAciSV9jS3pTdEVlWX1aeHdTQWFfVg==");
 // Add services to the container.
 
 builder.Services.AddControllers();
